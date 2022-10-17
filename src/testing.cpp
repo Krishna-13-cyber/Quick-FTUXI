@@ -26,11 +26,11 @@ struct Button
 {
     int order;
     std::string button = "Button";
-    std::string function;
+    std::string color;
 
     Button() { }
-    Button(int order, std::string button, std::string function)
-            : order(order), button(button), function(function) { }
+    Button(int order, std::string button, std::string color)
+            : order(order), button(button), color(color) { }
 
 };
 
@@ -38,11 +38,11 @@ struct Toggle
 {
     int order;
     std::string toggle = "Toggle";
-    std::string function;
+    std::string color;
 
     Toggle() { }
-    Toggle(int order, std::string toggle, std::string function)
-            : order(order), toggle(toggle), function(function) { }
+    Toggle(int order, std::string toggle, std::string color)
+            : order(order), toggle(toggle), color(color) { }
 
 };
 
@@ -54,12 +54,12 @@ public:
 
 Grammar() : Grammar::base_type(start)
     {
-        start = (qi::int_  >> ',' >> button >> ',' >> function)
+        start = (qi::int_ >> ',' >> button >> ',' >> color)
             [qi::_val = phx::construct <Button>(qi::_1, qi::_2, qi::_3) ];
     }
 
     qi::rule<Iterator, std::string()> button;
-    qi::rule<Iterator, std::string()> function;
+    qi::rule<Iterator, std::string()> color;
     qi::rule<Iterator, Button()> start;
 };
 
@@ -78,14 +78,14 @@ BOOST_FUSION_ADAPT_STRUCT(
 Button,
     (int, order)
     (std::string, button)
-    (std::string, function)
+    (std::string, color)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
 Toggle,
     (int, order)
     (std::string, toggle)
-    (std::string, function)
+    (std::string, color)
 )
 
 int main(int argc, char* argv[])
@@ -93,3 +93,4 @@ int main(int argc, char* argv[])
     testing(std::cin);
     return 0;
 }
+ 
