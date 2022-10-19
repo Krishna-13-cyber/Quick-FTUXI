@@ -9,7 +9,9 @@
 #include <boost/phoenix/phoenix.hpp>
 
 namespace AST {
+    std::vector <std::string> v;
     namespace Cmd {
+       // std::vector <std::string> v;
         struct Component  { std::string comp; };
         struct Color  { std::string col; };
         struct Function  { std::string func; };
@@ -30,6 +32,7 @@ BOOST_FUSION_ADAPT_STRUCT(AST::Cmd::Color, col)
 BOOST_FUSION_ADAPT_STRUCT(AST::Cmd::Function, func)
 
 namespace AST { namespace Cmd { // For demo/debug
+    std::vector <std::string> v;
     std::ostream& operator<<(std::ostream& os, Component const& cmd)  { return os << "Component " << boost::fusion::as_vector(cmd);  } 
     std::ostream& operator<<(std::ostream& os, Color const& cmd)  { return os << "Color " << boost::fusion::as_vector(cmd);  }
     std::ostream& operator<<(std::ostream& os, Function const& cmd)  { return os << "Function " << boost::fusion::as_vector(cmd);  }
@@ -41,15 +44,18 @@ template <typename It>
 struct ScriptGrammar : qi::grammar<It, AST::Commands()>
 {
     ScriptGrammar() : ScriptGrammar::base_type(start) {
+        std::vector <std::string> v;
         using namespace qi;
         start   = skip(space) [ script ];
         script  = command % ";";
         command = Component|Color|Function;
 
         Component  = "Component"  >> comp;
+      //  v.push_back(Component.comp);
         Color  = "Color"  >> col;
+      //  v.push_back(Color.col);
         Function  = "Function"  >> func;
-
+      //  v.push_back(Function.func);
         comp  = +~char_(";");
         col  = +~char_(";");
         func  = +~char_(";");
