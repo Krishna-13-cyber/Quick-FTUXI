@@ -21,11 +21,6 @@ namespace AST {
     using Commands = std::vector<Command>;
 }
 
-// std::vector <std::string> v;
-
-// v.push_back(Component.comp);
-// v.push_back(Color.col);
-// v.push_back(Function.func);
 
 BOOST_FUSION_ADAPT_STRUCT(AST::Cmd::Component, comp)
 BOOST_FUSION_ADAPT_STRUCT(AST::Cmd::Color, col)
@@ -44,14 +39,17 @@ template <typename It>
 struct ScriptGrammar : qi::grammar<It, AST::Commands()>
 {
     ScriptGrammar() : ScriptGrammar::base_type(start) {
-        std::vector <std::string> v;
+        using namespace AST;
+        std::vector <Component > component;
+        std::vector <Color> color;
+        std::vector <Function > function;
         using namespace qi;
         start   = skip(space) [ script ];
         script  = command % ";";
         command = Component|Color|Function;
 
         Component  = "Component"  >> comp;
-      //  v.push_back(Component.comp);
+       // v.push_back(Componen.comp);
         Color  = "Color"  >> col;
       //  v.push_back(Color.col);
         Function  = "Function"  >> func;
