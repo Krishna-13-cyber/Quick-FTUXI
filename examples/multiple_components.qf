@@ -1,0 +1,19 @@
+{
+    Button{
+        "arg1",
+        "arg2"
+    }
+    Button{
+        "arg3",
+        "arg4"
+    }
+    Button{
+        "arg5",
+        "arg6"
+    }
+    Input{
+        "arg6",
+        "arg7",
+        "arg8"
+    }
+}

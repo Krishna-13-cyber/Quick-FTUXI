@@ -1,69 +1,68 @@
-# Specify minimum cmake version required
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.14)
+project(quick-ftxui
+    LANGUAGES CXX
+    VERSION 0.1.0
+)
 
-# Download ftxui library
+find_package(Boost REQUIRED COMPONENTS regex)
+set(CMAKE_CXX_STANDARD_REQUIRED 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_BUILD_TYPE Debug)
+
+# --- Fetch FTXUI --------------------------------------------------------------
 include(FetchContent)
 
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
-  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-  GIT_TAG 87a1d75bf1c1ee964e8eed4a6686544ae3b44116
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+    GIT_TAG v3.0.0
 )
 
 FetchContent_GetProperties(ftxui)
+
 if(NOT ftxui_POPULATED)
-  FetchContent_Populate(ftxui)
-  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+    FetchContent_Populate(ftxui)
+    add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-# Find Threads Library
-find_package( Threads )
+# ------------------------------------------------------------------------------
+if(QUICK_FTXUI_TESTS)
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.0.1 # or a later release
+    )
 
-# CMake project description and project specific settings
-project(quick-ftxui
-        VERSION ${CMAKE_PROJECT_VERSION}
-        DESCRIPTION "Quick-FTUXI")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+    FetchContent_MakeAvailable(Catch2)
 
-# Set pru-gcc as the compiler
-
-# Specify Build type
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+    add_executable(tests tests/test1.cpp)
+    target_link_libraries(tests 
+        PRIVATE Catch2::Catch2WithMain
+        PRIVATE ftxui::screen
+        PRIVATE ftxui::dom
+        PRIVATE ftxui::component
+    )
+    target_include_directories(tests PRIVATE include)
+    include(CTest)
+    include(Catch)
+    catch_discover_tests(tests)
 endif()
-  
-######## SOURCES ########
-# Add source files and header files
-file(GLOB PROJECT_HEADERS ${quick-ftuxi_SOURCE_DIR}/include/*.hpp)
-file(GLOB PROJECT_SOURCES /tmp/temp.cpp)
-set(PROJECT_FILES
-    ${PROJECT_HEADERS}
-    ${PROJECT_SOURCES})
 
-######## TARGETS ########
-# Add executables
-add_executable(${PROJECT_NAME}-${CMAKE_PROJECT_VERSION} ${PROJECT_FILES})
-set_target_properties(${PROJECT_NAME}-${CMAKE_PROJECT_VERSION} PROPERTIES CXX_STANDARD 17)
-target_include_directories(${PROJECT_NAME}-${CMAKE_PROJECT_VERSION} PUBLIC 
-  $<BUILD_INTERFACE:${quick-ftuxi_SOURCE_DIR}/include/console>
-  $<BUILD_INTERFACE:${ftxui_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-
-# Link ftxui and Thread library
-target_link_libraries(${PROJECT_NAME}-${CMAKE_PROJECT_VERSION}
-PRIVATE ftxui::screen
-PRIVATE ftxui::dom
-PRIVATE ftxui::component
-${CMAKE_THREAD_LIBS_INIT}
+add_executable(quick-ftxui src/quick-ftxui.cpp)
+target_include_directories(quick-ftxui 
+    PRIVATE include 
+    PRIVATE ${Boost_INCLUDE_DIR} 
+    PRIVATE ${ftxui_SOURCE_DIR}
 )
 
+target_link_libraries(quick-ftxui
+    PRIVATE ${Boost_LIBRARIES}
+    PRIVATE ftxui::screen
+    PRIVATE ftxui::dom
+    PRIVATE ftxui::component # Not needed for this example.
+)
 
-######## INSTALL ########
-# Install generated binaries
-set(bin_destination "bin")
-install(TARGETS ${PROJECT_NAME}-${CMAKE_PROJECT_VERSION} DESTINATION ${bin_destination})
+target_compile_options(quick-ftxui PRIVATE -fsanitize=address)
+target_link_options(quick-ftxui PRIVATE -fsanitize=address)
 
-# Create symlink to remove version name and add install the symlink
-install(CODE "execute_process(COMMAND ln -sf ${PROJECT_NAME}-${CMAKE_PROJECT_VERSION} ${PROJECT_NAME} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})")
-install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} DESTINATION ${bin_destination})
+install(TARGETS quick-ftxui RUNTIME DESTINATION "bin")

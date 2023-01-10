@@ -1,0 +1,14 @@
+{
+    Button{
+        "Button1",
+        "Exit"
+    }
+    Button{
+        "Button2",
+        "Exit"
+    }
+    Button{
+        "arg3",
+        "Nothin"
+    }
+}
